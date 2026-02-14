@@ -1,38 +1,42 @@
 import pytesseract
 from PIL import Image
-from pdf2image import convert_from_path
-import os
-POPPLER_PATH = r"C:\Program Files\poppler\poppler-24.02.0\Library\bin"
-# POINT TO YOUR TESSERACT EXECUTABLE (Windows specific)
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-def extract_text(file_path):
-    try:
-        text = ""
-        
-        # Check if the file is a PDF
+class OCRService:
+    def __init__(self):
+        pass
+
+    def extract_text(self, file_path):
         if file_path.lower().endswith('.pdf'):
-            # Convert PDF to a list of images (one image per page)
-            # Note: You might need to specify poppler_path if it's not in your system PATH
-            images = convert_from_path(file_path,poppler_path=POPPLER_PATH)
-            
-            for i, img in enumerate(images):
-                print(f"Processing page {i+1}...")
-                text += pytesseract.image_to_string(img) + "\n"
-                
-        # Handle standard image files (JPG, PNG)
+            return self.extract_text_from_image_pdf(file_path)
         else:
-            img = Image.open(file_path)
-            text = pytesseract.image_to_string(img)
+            return self.extract_text_from_image(file_path)
 
-        return text
-
-    except Exception as e:
-        return f"An error occurred: {e}"
-
-# --- Test It ---
-image_file = r'C:\Users\ASUS\OneDrive\Desktop\Sayli_Thukral_resume.pdf' 
-result = extract_text(image_file)
-
-print("--- Extracted Text ---")
-print(result)
+    def extract_text_from_image(image_path):
+        try:
+            # Open the image file
+            image = Image.open(image_path)
+            # Use pytesseract to do OCR on the image
+            text = pytesseract.image_to_string(image)
+            return text
+        except Exception as e:
+            print(f"Error processing image: {e}")
+            return None
+    
+    def extract_text_from_image_pdf(self, pdf_path):
+        try:
+            # Convert PDF to images
+            from pdf2image import convert_from_path
+            images = convert_from_path(pdf_path)
+            text = ""
+            for image in images:
+                text += pytesseract.image_to_string(image)
+            return text
+        except Exception as e:
+            print(f"Error processing PDF: {e}")
+            return None
+        
+        
+if __name__ == "__main__":
+    ocr_service = OCRService()
+    text = ocr_service.extract_text('C:/Users/ASUS/OneDrive/Desktop/Sayli_Thukral_resume.pdf')
+    print(text)
