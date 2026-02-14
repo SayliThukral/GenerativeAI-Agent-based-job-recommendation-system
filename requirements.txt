@@ -1,0 +1,34 @@
+# --- Web Framework & Server ---
+fastapi==0.110.0
+uvicorn==0.27.1
+python-multipart==0.0.9  # Required for file uploads
+
+# --- OCR & Document Processing ---
+# For standard PDF text extraction
+pypdf==4.1.0
+# For image-based PDFs (requires Tesseract OCR installed on the OS)
+pytesseract==0.3.10
+pdf2image==1.17.0
+# Optional: High-performance AI parsing
+llama-index-readers-file==0.1.11
+
+# --- AI & LLM Orchestration ---
+# Core framework for the Job Search Agent
+langchain==0.1.12
+langchain-google-genai==1.0.1  # For Gemini integration
+langchain-community==0.0.28    # For Serper/Search tools
+google-generativeai==0.4.1
+
+# --- Search & Networking ---
+# For the Serper API job search tool
+requests==2.31.0
+duckduckgo-search==5.1.0       # Backup search tool
+
+# --- Data Handling & Validation ---
+pydantic==2.6.3
+pandas==2.2.1                  # Useful for formatting job search results
+python-dotenv==1.0.1           # For managing .env API keys
+
+# --- Deployment & Testing ---
+pytest==8.1.1
+gunicorn==21.2.0               # Production-grade WSGI server
