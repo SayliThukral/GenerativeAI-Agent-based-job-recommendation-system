@@ -38,5 +38,5 @@ class OCRService:
         
 if __name__ == "__main__":
     ocr_service = OCRService()
-    text = ocr_service.extract_text('C:/Users/ASUS/OneDrive/Desktop/Sayli_Thukral_resume.pdf')
+    text = ocr_service.extract_text('C:/Users/ASUS/Downloads/Mt.pdf')
     print(text)
