@@ -9,19 +9,20 @@ from src.services.utils import Utils
 from src.services.prompts.extraction_prompt import SYSTEM_PROMPT,USER_PROMPT
 load_dotenv()
 
-class ats_service:
+class ATSservice:
     def __init__(self):
        self.client=OpenAI()
 
     def extract_subheadings(self,ocr_text):
         try: 
             response = self.client.chat.completions.create(
-            model="gpt-4.1-mini",  # fast & cost-effective
+            model="gpt-4o-mini",  # fast & cost-effective
             
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": USER_PROMPT}
                 ],
+                response_format= { "type": "json_object" },
                 temperature=0,
             )
             return response
@@ -31,6 +32,7 @@ class ats_service:
        
     def calculate_score(self):
         pass
+
 
 # -----------------------------
 # SECTION SYNONYMS
