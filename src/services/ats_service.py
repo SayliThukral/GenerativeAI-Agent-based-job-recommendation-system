@@ -25,7 +25,7 @@ class ATSservice:
                 response_format= { "type": "json_object" },
                 temperature=0,
             )
-            return response
+            return response.choices[0].message.content
         except Exception as e:
             raise e
         
