@@ -20,7 +20,7 @@ class ATSservice:
             
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": USER_PROMPT}
+                {"role": "user", "content": USER_PROMPT.format(raw_text=ocr_text)}
                 ],
                 response_format= { "type": "json_object" },
                 temperature=0,
@@ -163,8 +163,7 @@ def validate_and_extract_keywords(ocr_text: str):
 # -----------------------------
 # MAIN EXECUTION
 # -----------------------------
-if __name__ == "__main__":
-
+"""if __name__ == "__main__":
     ocr_service = OCRService()
 
     file_path = r"C:\Users\ASUS\Downloads\Mt.pdf"
@@ -187,4 +186,4 @@ if __name__ == "__main__":
         print("\n--- FINAL RESULT ---\n")
         print(json.dumps(result, indent=4))
 
-    
+    """
