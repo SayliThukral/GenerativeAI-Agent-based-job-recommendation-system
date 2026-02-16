@@ -11,18 +11,20 @@ load_dotenv()
 
 class ats_service:
     def __init__(self):
-        pass
+       self.client=OpenAI()
 
     def extract_subheadings(self,ocr_text):
         try: 
-            response = client.chat.completions.create(
+            response = self.client.chat.completions.create(
             model="gpt-4.1-mini",  # fast & cost-effective
+            
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Explain FastAPI in simple terms."}
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": USER_PROMPT}
                 ],
                 temperature=0,
             )
+            return response
         except Exception as e:
             raise e
         
