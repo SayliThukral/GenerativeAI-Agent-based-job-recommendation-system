@@ -1,7 +1,7 @@
 import pytesseract
 from PIL import Image
 
-class OCRService:
+class TextExtractor:
     def __init__(self):
         pass
 
@@ -37,6 +37,6 @@ class OCRService:
         
         
 if __name__ == "__main__":
-    ocr_service = OCRService()
-    text = ocr_service.extract_text('C:/Users/ASUS/Downloads/Mt.pdf')
+    text_extractor = TextExtractor()
+    text = text_extractor.extract_text('C:/Users/ASUS/Downloads/Mt.pdf')
     print(text)
