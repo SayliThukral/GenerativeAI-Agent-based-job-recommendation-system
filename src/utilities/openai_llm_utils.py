@@ -524,7 +524,7 @@ class OpenAITextGenerator(BaseGenerator):
             *args,
             **kwargs,
         )
-        return self._construct_response(response, json_response)
+        async_
 
     async def async_generate_raw_response(
         self,
