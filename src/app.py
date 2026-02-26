@@ -24,11 +24,13 @@ class Pipeline:
                 return "No text extracted from job description."
 
             cv_items = await self.ats_service.extract_cv_items(ocr_text)
-            jd_items = await self.ats_service.extract_jd_items(jd_text)
+            return cv_items
+            #print(cv_items)
+            #jd_items = await self.ats_service.extract_jd_items(jd_text)
            
-            ats_score = await self.ats_service.generate_ats_score(cv_items, jd_items)
+            #ats_score = await self.ats_service.generate_ats_score(cv_items, jd_items)
 
-            return ats_score
+            #return ats_score
 
         except Exception as e:
             return f"Error processing resume: {e}"
