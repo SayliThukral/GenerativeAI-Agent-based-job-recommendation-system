@@ -19,8 +19,8 @@ class AIGeneratorResponse(TypedDict):
     model: str
     input_tokens: int
     output_tokens: int
-    system_prompt: Optional[str] 
-    user_prompt: Optional[str] 
+    system_prompt: Optional[str] = None
+    user_prompt: Optional[str] = None
 
 
 class BaseGenerator(ABC):
@@ -524,7 +524,7 @@ class OpenAITextGenerator(BaseGenerator):
             *args,
             **kwargs,
         )
-        async_
+        return self._construct_response(response, json_response)
 
     async def async_generate_raw_response(
         self,

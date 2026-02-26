@@ -22,6 +22,7 @@ class ATSservice:
             response = await self.ai_generator.async_generate_response(
                 system_prompt=SYSTEM_PROMPT,
                 user_prompt=USER_PROMPT.format(raw_text=ocr_text),
+                json_response=True,
                 # response_model=ATSResult
             )
             
@@ -30,12 +31,12 @@ class ATSservice:
         except Exception as e:
             raise e
         
-    async  def extract_jd_items(self, jd_text):
+    async def extract_jd_items(self, jd_text):
         try: 
             response = await self.ai_generator.async_generate_response(
                 system_prompt=JD_SYSTEM_PROMPT,
                 user_prompt=JD_USER_PROMPT.format(jd_text=jd_text),
-                
+                json_response=True                
             )
             
             return response["response"]
@@ -56,6 +57,7 @@ class ATSservice:
             response = await self.ai_generator.async_generate_response(
                 system_prompt=ATS_SCORE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
+                json_response=True
                 
             )
 
