@@ -1,53 +1,55 @@
+import os
 import requests
 import json
+from dotenv import load_dotenv
 
-# 🔑 Replace with your actual Serper API key
-SERPER_API_KEY = "788071f68c70c5fb8d24abd94cf0b6ea77ff5fa2"
+load_dotenv()
 
-def search_youtube(query):
+def get_youtube_tutorials_for_gaps(domain):
+    """
+    Takes the extracted Domain and missing skills from the ATS logic
+    and returns YouTube video recommendations.
+    """
+    
     url = "https://google.serper.dev/search"
-
-    payload = {
-        "q": query,
-        "type": "videos"   # This ensures YouTube/video results
-    }
-
     headers = {
-        "X-API-KEY": SERPER_API_KEY,
+        "X-API-KEY": os.getenv("SERPER_API_KEY"),
         "Content-Type": "application/json"
     }
-
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
-
-    if response.status_code == 200:
+    
+    # Construct a search query focused strictly on YouTube results
+    query = f"{domain} resume formatting tutorial site:youtube.com"
+    payload = json.dumps({
+        "q": query,
+        "num": 3  
+    })
+    
+    recommendations = {}
+    
+    try:
+        # Make the POST request to the Serper API
+        response = requests.post(url, headers=headers, data=payload)
+        response.raise_for_status() # Catch any HTTP errors
         data = response.json()
-
-        print("\n✅ API Working! Here are YouTube links:\n")
-
-        for video in data.get("videos", []):
-            print("Title:", video.get("title"))
-            print("Link:", video.get("link"))
-            print("-" * 50)
-
-    else:
-        print("❌ Error:", response.status_code)
-        print(response.text)
-
-
-# 🔍 Test Search
-search_youtube("machine learning tutorial")
-
-# # test_serper_api.py
-# import asyncio
-# from src.services.search_service import SearchService
-
-# async def main():
-#     service = SearchService()
-#     skill = "Python"  # Example skill
-#     videos = await service.get_youtube_tutorials(skill)
-#     print("YouTube tutorials for", skill)
-#     for v in videos:
-#         print(v)
-
-# if __name__ == "__main__":
-#     asyncio.run(main())
+        
+        # Extract the relevant links from the 'organic' search results
+        if "organic" in data:
+            tutorials = []
+            for item in data["organic"]:
+                title = item.get("title")
+                link = item.get("link")
+                
+                # Double-check that the link is actually a YouTube video
+                if link and ("youtube.com" in link or "youtu.be" in link):
+                    tutorials.append({
+                        "title": title,
+                        "url": link
+                    })
+            
+            recommendations[f"{domain}_resume_tutorials"] = tutorials
+            
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred while calling the Serper API: {e}")
+        recommendations["error"] = "Failed to fetch video recommendations."
+                
+    return recommendations
