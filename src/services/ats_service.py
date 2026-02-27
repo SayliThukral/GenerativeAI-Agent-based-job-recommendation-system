@@ -5,6 +5,7 @@ from src.models.ats_models import ATSResult
 from src.utilities.openai_llm_utils import OpenAI_Text_Config, OpenAITextGenerator
 from src.services.prompts.jd_prompts import JD_SYSTEM_PROMPT,JD_USER_PROMPT
 from src.services.prompts.ats_score_prompt import ATS_SCORE_SYSTEM_PROMPT
+from src.services.prompts.summarise_missing_items_prompts import SUMMARY_SYSTEM_PROMPT,SUMMARY_USER_PROMPT
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -65,6 +66,19 @@ class ATSservice:
 
         except Exception as e:
             raise e
+        
+    async def summarise_missing_items(self,domain,mismatched_items):
+        try:
+            response = await self.ai_generator.async_generate_response(
+            system_prompt=SUMMARY_SYSTEM_PROMPT,
+            user_prompt=SUMMARY_USER_PROMPT.format(domain=domain,missing_keywords=mismatched_items)
+            )
+            return response["response"]
+
+        except Exception as e:
+            raise e
+
+
+
        
-    def calculate_score(self):
-        pass
+    
