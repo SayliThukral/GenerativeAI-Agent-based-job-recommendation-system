@@ -23,13 +23,15 @@ class TextExtractor:
             return None
     
     def extract_text_from_image_pdf(self, pdf_path):
-        try:
+        try: 
             # Convert PDF to images
-            from pdf2image import convert_from_path
-            images = convert_from_path(pdf_path)
+            from pypdf import PdfReader
+            reader = PdfReader(pdf_path)
+            num_pages = len(reader.pages)
             text = ""
-            for image in images:
-                text += pytesseract.image_to_string(image)
+            for page in range(num_pages):
+                page_obj = reader.pages[page]
+                text += page_obj.extract_text()
             return text
         except Exception as e:
             print(f"Error processing PDF: {e}")
