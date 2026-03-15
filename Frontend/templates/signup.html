@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Signup</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Create Account</h1>
+
+<form action="/signup" method="post">
+
+<label>Username</label>
+<input type="text" name="username" required>
+
+<label>Name</label>
+<input type="text" name="name" required>
+
+<label>Email</label>
+<input type="email" name="email" required>
+
+<label>Mobile Number (Optional)</label>
+<input type="text" name="mobile">
+
+<label>New Password</label>
+<input type="password" name="password" required>
+
+<label>Confirm Password</label>
+<input type="password" name="confirm_password" required>
+
+<button type="submit">Sign Up</button>
+
+</form>
+
+<p>Already have account? <a href="/">Login</a></p>
+
+</div>
+
+</body>
+</html>

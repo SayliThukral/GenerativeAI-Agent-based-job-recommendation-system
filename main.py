@@ -1,46 +1,68 @@
 import os
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from src.app import Pipeline
 
 app = FastAPI()
 
-# Create temp folder if not exists
+# Create temp folder
 os.makedirs("temp", exist_ok=True)
 
+# Static folder (CSS + JS)
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+
+# Templates folder (HTML)
+templates = Jinja2Templates(directory="frontend/templates")
+
+
+# Home route
 @app.get("/")
-def read_main():
+def home():
     return {"message": "Welcome to the Job recommendation system!"}
 
 
-@app.post("/upload-files")
+# Dashboard page
+@app.get("/dashboard")
+def dashboard(request: Request):
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@app.get("/login")
+def login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.get("/signup")
+def signup(request: Request):
+    return templates.TemplateResponse("signup.html", {"request": request})
+
+
+# Upload API
+@app.post("/upload")
 async def upload_files(
-    cv: UploadFile = File(...),
+    resume: UploadFile = File(...),
     jd: UploadFile = File(...)
 ):
     try:
-        # Save CV file
-        cv_location = f"temp/{cv.filename}"
-        with open(cv_location, "wb") as buffer:
-            buffer.write(await cv.read())
 
-        # Save JD file
-        jd_location = f"temp/{jd.filename}"
-        with open(jd_location, "wb") as buffer:
+        # Save Resume
+        resume_path = f"temp/{resume.filename}"
+        with open(resume_path, "wb") as buffer:
+            buffer.write(await resume.read())
+
+        # Save Job Description
+        jd_path = f"temp/{jd.filename}"
+        with open(jd_path, "wb") as buffer:
             buffer.write(await jd.read())
 
-        # Process both files
+        # Run Pipeline
         pipeline = Pipeline()
-        result = pipeline.process_resume(cv_location, jd_location)
+        result = await pipeline.process_resume(resume_path, jd_path)
 
         return {
-            "cv_filename": cv.filename,
-            "jd_filename": jd.filename,
+            "message": "Resume uploaded successfully",
             "result": result
         }
 
     except Exception as e:
         return {"error": str(e)}
-    
-#if __name__ == "__main__":
-
-    #uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
