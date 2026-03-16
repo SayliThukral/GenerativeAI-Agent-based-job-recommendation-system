@@ -58,10 +58,14 @@ async def upload_files(
         # Run Pipeline
         pipeline = Pipeline()
         result = await pipeline.process_resume(resume_path, jd_path)
+        print(result)
 
         return {
             "message": "Resume uploaded successfully",
-            "result": result
+            "ats_score": result.get("ats_score"),
+            "matched_items": result.get("matched_skills"),
+            "mismatched_items": result.get("mismatched_items"),
+            "youtube_recommendations": result.get("youtube_recommendations")
         }
 
     except Exception as e:
