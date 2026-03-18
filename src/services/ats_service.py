@@ -15,6 +15,7 @@ class ATSservice:
        self.ai_generator = OpenAITextGenerator(
            config=OpenAI_Text_Config(
                model=GPT_Model.GPT_40_MINI.value,
+               temperature=0
            )
          )
 

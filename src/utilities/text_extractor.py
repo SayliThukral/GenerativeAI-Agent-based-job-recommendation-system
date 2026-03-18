@@ -11,7 +11,7 @@ class TextExtractor:
         else:
             return self.extract_text_from_image(file_path)
 
-    def extract_text_from_image(image_path):
+    def extract_text_from_image(self,image_path):
         try:
             # Open the image file
             image = Image.open(image_path)

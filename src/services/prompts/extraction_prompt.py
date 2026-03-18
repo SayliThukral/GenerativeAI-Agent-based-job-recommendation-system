@@ -13,7 +13,7 @@ Return STRICTLY this JSON format and nothing else:
   "Name": "Extracted Full Name",
   "Email": "Extracted Email Address",
   "Phone": "Extracted Phone Number",
-  "Domain": "Primary Professional Domain",
+  "Domain": "Highly Specific Role based on Skills (e.g., ML Engineer)",
   "Education": [
     "Degree/School Name 1",
     "Degree/School Name 2"

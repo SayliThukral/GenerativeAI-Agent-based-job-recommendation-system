@@ -1,49 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Dashboard</title>
-<link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHire Engine - AI Resume Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
-
 <body>
 
 <div class="container">
+    <div class="top-link">
+        <a href="/about">About Page</a>
+    </div>
 
-<div class="top-link">
-<a href="/about">About Page</a>
-</div>
+    <h1>SmartHire Engine</h1>
+    <p class="tagline">Generative AI-based Job Recommendation & Gap Analysis System</p>
 
-<h1>SmartHire Engine</h1>
-<p class="tagline">GenerativeAI Agent-based Job Recommendation System</p>
+    <form id="uploadForm">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
 
-<form id="uploadForm">
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" name="dob" required>
 
-<label>Full Name</label>
-<input type="text" placeholder="Enter your name">
+        <label for="education">Highest Education Level</label>
+        <select id="education" name="education" required>
+            <option value="" disabled selected>Select Education Level</option>
+            <option value="bachelor">Bachelor's Degree</option>
+            <option value="master">Master's Degree</option>
+            <option value="phd">PhD</option>
+        </select>
 
-<label>Date of Birth</label>
-<input type="date">
+        <label for="resume">Upload Resume (PDF/DOCX)</label>
+        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
 
-<label>Education</label>
-<select>
-<option>Select Education</option>
-<option>Bachelor</option>
-<option>Master</option>
-<option>PhD</option>
-</select>
+        <label for="jd">Upload Job Description (PDF/DOCX)</label>
+        <input type="file" id="jd" name="jd" accept=".pdf,.doc,.docx" required>
 
-<label>Upload Resume</label>
-<input type="file" id="resume" name="resume" required>
+        <button type="submit">Analyze Profile</button>
 
-<label>Upload Job Description</label>
-<input type="file" id="jd" name="jd" required>
+        <div id="loading" style="display: none; margin-top: 15px; font-weight: bold; color: #007bff;">
+            ⏳ Analyzing resume against Job Description... Please wait.
+        </div>
+    </form>
 
-<button type="submit">Submit</button>
-
-</form>
-
-<div id="result"></div>
-
+    <div id="result"></div>
 </div>
 
 <script src="/static/script.js"></script>
