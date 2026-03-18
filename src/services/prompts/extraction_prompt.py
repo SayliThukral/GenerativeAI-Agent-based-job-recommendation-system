@@ -1,4 +1,4 @@
-SYSTEM_PROMPT = """
+CV_SYSTEM_PROMPT = """
 You are an expert Resume Parsing AI. Your task is to extract all relevant professional and academic details from the provided resume text and output them in a strictly formatted JSON object.
 
 Rules for Extraction:
@@ -41,7 +41,7 @@ Return STRICTLY this JSON format and nothing else:
 }
 """
 
-USER_PROMPT = """
+CV_USER_PROMPT = """
 Extract the details from the following resume text according to your system instructions:
 
 {raw_text}

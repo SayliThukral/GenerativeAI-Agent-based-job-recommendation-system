@@ -80,8 +80,10 @@ class Pipeline:
 if __name__ == "__main__":
     pipeline = Pipeline()
 
-    cv_path = "C:/Users/ASUS/OneDrive/Desktop/Sayli_Thukral_resume.pdf"
-    jd_path = "C:/Users/ASUS/Downloads/Machine_Learning_Engineer_Job_Description.pdf"
+    cv_path="C:/Users/ishaa/OneDrive/Desktop/ml-prfl/GenerativeAI-Agent-based-job-recommendation-system/temp/karan_resume.pdf"
+    jd_path="C:/Users/ishaa/OneDrive/Desktop/ml-prfl/GenerativeAI-Agent-based-job-recommendation-system/temp/FW-SWE-I-JD-2.pdf"
+    # cv_path = "C:/Users/ASUS/OneDrive/Desktop/Sayli_Thukral_resume.pdf"
+    # jd_path = "C:/Users/ASUS/Downloads/Machine_Learning_Engineer_Job_Description.pdf"
 
     result = asyncio.run(pipeline.process_resume(cv_path, jd_path))
 

@@ -1,10 +1,10 @@
 from openai import OpenAI
-from src.services.prompts.extraction_prompt import SYSTEM_PROMPT,USER_PROMPT
+from src.services.prompts.extraction_prompt import CV_SYSTEM_PROMPT,CV_USER_PROMPT
 from constants import GPT_Model
 from src.models.ats_models import ATSResult
 from src.utilities.openai_llm_utils import OpenAI_Text_Config, OpenAITextGenerator
 from src.services.prompts.jd_prompts import JD_SYSTEM_PROMPT,JD_USER_PROMPT
-from src.services.prompts.ats_score_prompt import ATS_SCORE_SYSTEM_PROMPT
+from src.services.prompts.ats_score_prompt import ATS_SCORE_SYSTEM_PROMPT, ATS_SCORE_USER_PROMPT
 from src.services.prompts.summarise_missing_items_prompts import SUMMARY_SYSTEM_PROMPT,SUMMARY_USER_PROMPT
 
 from dotenv import load_dotenv
@@ -22,8 +22,8 @@ class ATSservice:
     async def extract_cv_items(self, ocr_text):
         try: 
             response = await self.ai_generator.async_generate_response(
-                system_prompt=SYSTEM_PROMPT,
-                user_prompt=USER_PROMPT.format(raw_text=ocr_text),
+                system_prompt=CV_SYSTEM_PROMPT,
+                user_prompt=CV_USER_PROMPT.format(raw_text=ocr_text),
                 json_response=True,
                 # response_model=ATSResult
             )
@@ -48,19 +48,10 @@ class ATSservice:
 
     async def generate_ats_score(self, cv_data, jd_data):
         try:
-            user_prompt = f"""
-            CV DATA:
-            {cv_data}
-
-            JOB DESCRIPTION DATA:
-            {jd_data}
-            """
-
             response = await self.ai_generator.async_generate_response(
                 system_prompt=ATS_SCORE_SYSTEM_PROMPT,
-                user_prompt=user_prompt,
+                user_prompt=ATS_SCORE_USER_PROMPT.format(cv_data=cv_data, jd_data=jd_data),
                 json_response=True
-                
             )
 
             return response["response"]

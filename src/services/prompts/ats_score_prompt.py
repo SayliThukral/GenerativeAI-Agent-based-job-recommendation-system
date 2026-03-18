@@ -35,3 +35,13 @@ Return STRICT JSON format:
 
 Do not return anything outside JSON.
 """
+
+ATS_SCORE_USER_PROMPT = """
+Given the following parsed CV data and Job Description data, generate an ATS score and gap analysis based on the provided system prompt instructions.
+
+CV DATA:
+{cv_data}
+
+JOB DESCRIPTION DATA:
+{jd_data}
+"""
