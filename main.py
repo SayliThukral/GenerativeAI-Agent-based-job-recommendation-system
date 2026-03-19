@@ -22,6 +22,10 @@ def home():
     return {"message": "Welcome to the Job recommendation system!"}
 
 
+@app.get("/about")
+def about(request: Request):
+    return templates.TemplateResponse("about.html", {"request": request})
+
 # Dashboard page
 @app.get("/dashboard")
 def dashboard(request: Request):
@@ -29,12 +33,18 @@ def dashboard(request: Request):
 
 @app.get("/login")
 def login(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-
+    messages = []  
+    return templates.TemplateResponse("login.html", {"request": request, "messages": messages})
 
 @app.get("/signup")
 def signup(request: Request):
-    return templates.TemplateResponse("signup.html", {"request": request})
+    messages = []
+    return templates.TemplateResponse("signup.html", {"request": request, "messages": messages})
+
+@app.get("/forgot-password")
+def forgot_password(request: Request):
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+
 
 
 # Upload API
@@ -58,11 +68,20 @@ async def upload_files(
         # Run Pipeline
         pipeline = Pipeline()
         result = await pipeline.process_resume(resume_path, jd_path)
+        result["message"] = "Resume uploaded successfully"
         print(result)
 
         return {
             "message": "Resume uploaded successfully",
             "ats_score": result.get("ats_score"),
+
+            # --- ADD THESE MISSING KEYS ---
+            "skills_match_percentage": result.get("skills_match_percentage"),
+            "experience_match_percentage": result.get("experience_match_percentage"),
+            "education_match_percentage": result.get("education_match_percentage"),
+            "matched_skills": result.get("matched_skills"),
+            "analysis": result.get("analysis"),
+            "gap_analysis": result.get("gap_analysis"),
             
             "mismatched_items": result.get("mismatched_items"),
             "youtube_recommendations": result.get("youtube_recommendations")

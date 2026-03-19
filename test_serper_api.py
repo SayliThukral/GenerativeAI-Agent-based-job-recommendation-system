@@ -21,7 +21,7 @@ def get_youtube_tutorials_for_gaps(domain):
     query = f"{domain} resume formatting tutorial site:youtube.com"
     payload = json.dumps({
         "q": query,
-        "num": 3  
+        "num": 6  
     })
     
     recommendations = {}

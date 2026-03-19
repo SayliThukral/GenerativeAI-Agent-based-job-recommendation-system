@@ -1,22 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>About</title>
-<link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHire Engine — About</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #0b0f1a;
+            --surface:   rgba(255,255,255,0.04);
+            --border:    rgba(255,255,255,0.08);
+            --accent:    #4f8eff;
+            --accent2:   #a78bfa;
+            --accent3:   #34d399;
+            --text:      #e8eaf0;
+            --muted:     #6b7280;
+            --shadow:    0 8px 32px rgba(0,0,0,0.4);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'DM Sans',sans-serif;
+            background:var(--bg); color:var(--text);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+        body::before {
+            content:''; position:fixed; inset:0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,142,255,.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167,139,250,.10) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(52,211,153,.05) 0%, transparent 60%);
+            pointer-events:none; z-index:0;
+        }
+        body::after {
+            content:''; position:fixed; inset:0;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size:48px 48px;
+            pointer-events:none; z-index:0;
+        }
+
+        .page-wrap {
+            position:relative; z-index:1;
+            max-width:760px; margin:0 auto;
+            padding:52px 24px 80px;
+        }
+
+        /* Back link */
+        .back-link {
+            display:inline-flex; align-items:center; gap:6px;
+            color:var(--muted); font-size:13px; text-decoration:none;
+            margin-bottom:44px;
+            transition:color .2s;
+        }
+        .back-link:hover { color:var(--accent); }
+
+        /* Hero */
+        .hero { text-align:center; margin-bottom:56px; animation:fadeDown .7s ease both; }
+        .hero .badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(79,142,255,.12); border:1px solid rgba(79,142,255,.25);
+            color:var(--accent); font-size:11px; font-weight:500;
+            letter-spacing:.08em; text-transform:uppercase;
+            padding:4px 12px; border-radius:100px; margin-bottom:20px;
+        }
+        .hero h1 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(2rem,5vw,3rem);
+            font-weight:800; letter-spacing:-.03em; line-height:1.1;
+            background:linear-gradient(135deg,#fff 0%,#a3b8ff 60%,#a78bfa 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .hero p {
+            margin-top:14px; color:var(--muted); font-size:15px;
+            font-weight:300; max-width:520px; margin-left:auto; margin-right:auto; line-height:1.65;
+        }
+
+        /* Feature cards */
+        .features {
+            display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+            gap:16px; margin-bottom:36px;
+            animation:fadeUp .7s .1s ease both;
+        }
+        .feat-card {
+            background:var(--surface); border:1px solid var(--border);
+            border-radius:16px; padding:24px 22px;
+            backdrop-filter:blur(12px);
+            transition:border-color .2s, transform .2s;
+        }
+        .feat-card:hover { border-color:rgba(255,255,255,.15); transform:translateY(-2px); }
+        .feat-icon {
+            width:40px; height:40px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-size:18px; margin-bottom:14px;
+        }
+        .feat-card h3 {
+            font-family:'Syne',sans-serif;
+            font-size:14px; font-weight:700; margin-bottom:7px;
+        }
+        .feat-card p { font-size:13px; color:var(--muted); line-height:1.55; }
+
+        /* About block */
+        .about-block {
+            background:var(--surface); border:1px solid var(--border);
+            border-radius:18px; padding:32px 36px;
+            backdrop-filter:blur(12px);
+            animation:fadeUp .7s .18s ease both;
+        }
+        .about-block h2 {
+            font-family:'Syne',sans-serif;
+            font-size:18px; font-weight:700; margin-bottom:14px;
+            display:flex; align-items:center; gap:10px;
+        }
+        .about-block h2 .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+        .about-block p { font-size:14px; color:#c0c5d0; line-height:1.75; }
+
+        /* CTA */
+        .cta-row { text-align:center; margin-top:40px; animation:fadeUp .7s .24s ease both; }
+        .btn-primary {
+            display:inline-flex; align-items:center; gap:8px;
+            padding:13px 28px;
+            background:linear-gradient(135deg,var(--accent),var(--accent2));
+            border:none; border-radius:11px; color:#fff;
+            font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+            letter-spacing:.04em; cursor:pointer; text-decoration:none;
+            box-shadow:0 4px 20px rgba(79,142,255,.25);
+            transition:transform .15s, box-shadow .2s;
+        }
+        .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 28px rgba(79,142,255,.4); }
+
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:translateY(0)} }
+    </style>
 </head>
-
 <body>
+<div class="page-wrap">
 
-<div class="container">
+    <a href="/dashboard" class="back-link">← Back to Dashboard</a>
 
-<h1>About SmartHire</h1>
+    <!-- Hero -->
+    <div class="hero">
+        <div class="badge">✦ About SmartHire</div>
+        <h1>Hire Smarter.<br>Grow Faster.</h1>
+        <p>SmartHire Engine is a Generative AI-powered career analysis platform that matches candidate profiles with relevant job opportunities and surfaces actionable skill gaps.</p>
+    </div>
 
-<p>
-SmartHire Engine is a GenerativeAI Agent-based job recommendation system
-that matches candidate profiles with relevant job opportunities using AI.
-</p>
+    <!-- Feature cards -->
+    <div class="features">
+        <div class="feat-card">
+            <div class="feat-icon" style="background:rgba(79,142,255,.12)">🤖</div>
+            <h3>AI-Powered Matching</h3>
+            <p>Compares your resume against any job description with precision.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon" style="background:rgba(248,113,113,.10)">📊</div>
+            <h3>Gap Analysis</h3>
+            <p>Instantly identifies missing skills, experience, and education requirements.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon" style="background:rgba(52,211,153,.10)">🎯</div>
+            <h3>ATS Scoring</h3>
+            <p>Calculates your ATS compatibility score and explains every contributing factor.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon" style="background:rgba(167,139,250,.10)">📚</div>
+            <h3>Learning Paths</h3>
+            <p>Curated YouTube recommendations mapped directly to your skill gaps.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon" style="background:rgba(167,139,250,.10)">🔎</div>
+            <h3>Job Recommendations</h3>
+            <p>Job recommendations based on your skills, experience, and education.</p>
+        </div>
+        <div class="feat-card">
+            <div class="feat-icon" style="background:rgba(251,191,36,.10)">🛣️</div>
+            <h3>AI Interview Prep</h3>
+            <p>Custom interview questions and mock scenarios based on your specific skill gaps.</p>
+        </div>    
+    </div>
+
+    <!-- About text -->
+    <div class="about-block">
+        <h2><span class="dot"></span>Our Mission</h2>
+        <p>
+            SmartHire Engine was built to bridge the gap between job seekers and opportunities.
+            Traditional resumes are static — the modern job market is not. Our AI agent continuously
+            adapts its analysis based on real job descriptions, giving you a dynamic, honest picture
+            of where you stand and exactly what to do next. Whether you're a fresh graduate or
+            a seasoned professional pivoting careers, SmartHire Engine helps you put your
+            best foot forward — backed by data, not guesswork.
+        </p>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-row">
+        <a href="/dashboard" class="btn-primary">Analyze My Profile →</a>
+    </div>
 
 </div>
-
 </body>
 </html>
