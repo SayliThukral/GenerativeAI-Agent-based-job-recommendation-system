@@ -43,7 +43,8 @@ def signup(request: Request):
 
 @app.get("/forgot-password")
 def forgot_password(request: Request):
-    return templates.TemplateResponse("forgot_password.html", {"request": request})
+    messages = []
+    return templates.TemplateResponse("forgot_password.html", {"request": request, "messages": messages})
 
 
 
