@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHire Engine - AI Resume Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ── Tokens ─────────────────────────────────────────── */
+        :root {
+            --bg:           #0b0f1a;
+            --surface:      rgba(255,255,255,0.04);
+            --surface-hover:rgba(255,255,255,0.07);
+            --border:       rgba(255,255,255,0.08);
+            --accent:       #4f8eff;
+            --accent2:      #a78bfa;
+            --accent3:      #34d399;
+            --danger:       #f87171;
+            --text:         #e8eaf0;
+            --muted:        #6b7280;
+            --card-shadow:  0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family:'DM Sans',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            min-height:100vh;
+            overflow-x:hidden;
+        }
+
+        body::before {
+            content:'';
+            position:fixed; inset:0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,142,255,.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167,139,250,.10) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(52,211,153,.05) 0%, transparent 60%);
+            pointer-events:none; z-index:0;
+        }
+
+        body::after {
+            content:'';
+            position:fixed; inset:0;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size:48px 48px;
+            pointer-events:none; z-index:0;
+        }
+
+        .page-wrap {
+            position:relative; z-index:1;
+            max-width:800px;
+            margin:0 auto;
+            padding:48px 24px 80px;
+        }
+
+        /* ── Header ─────────────────────────────────────────── */
+        .header {
+            text-align:center;
+            margin-bottom:52px;
+            animation:fadeDown .7s ease both;
+        }
+        .header .badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(79,142,255,.12);
+            border:1px solid rgba(79,142,255,.25);
+            color:var(--accent);
+            font-size:12px; font-weight:500;
+            letter-spacing:.08em; text-transform:uppercase;
+            padding:5px 14px; border-radius:100px;
+            margin-bottom:20px;
+        }
+        .header h1 {
+            font-family:'Syne',sans-serif;
+            font-size:clamp(2.2rem,5vw,3.2rem);
+            font-weight:800; letter-spacing:-.03em; line-height:1.1;
+            background:linear-gradient(135deg,#fff 0%,#a3b8ff 60%,#a78bfa 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .header p { margin-top:12px; color:var(--muted); font-size:15px; font-weight:300; }
+
+        .about-link {
+            display:inline-flex; align-items:center; gap:4px;
+            color:var(--muted); font-size:13px; text-decoration:none;
+            margin-bottom:32px; transition:color .2s;
+        }
+        .about-link:hover { color:var(--accent); }
+
+        /* ── Form card ──────────────────────────────────────── */
+        .form-card {
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:20px;
+            padding:36px 40px;
+            backdrop-filter:blur(16px);
+            box-shadow:var(--card-shadow);
+            animation:fadeUp .7s .1s ease both;
+        }
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .form-group { display:flex; flex-direction:column; gap:7px; }
+        .form-group.full { grid-column:1 / -1; }
+
+        label {
+            font-size:12px; font-weight:500;
+            letter-spacing:.06em; text-transform:uppercase;
+            color:var(--muted);
+        }
+        input[type="text"], input[type="date"], select {
+            background:rgba(255,255,255,.05);
+            border:1px solid var(--border); border-radius:10px;
+            padding:11px 14px; color:var(--text);
+            font-family:'DM Sans',sans-serif; font-size:14px;
+            transition:border-color .2s,background .2s,box-shadow .2s;
+            outline:none; appearance:none;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(.6); cursor:pointer; }
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            border-color:var(--accent);
+            background:rgba(79,142,255,.06);
+            box-shadow:0 0 0 3px rgba(79,142,255,.12);
+        }
+        select option { background:#1a1f2e; }
+
+        /* File upload */
+        .file-upload-wrap { position:relative; }
+        .file-upload-label {
+            display:flex; align-items:center; gap:12px;
+            background:rgba(255,255,255,.04);
+            border:1px dashed rgba(255,255,255,.15);
+            border-radius:10px; padding:14px 16px;
+            cursor:pointer; transition:border-color .2s,background .2s;
+        }
+        .file-upload-label:hover { border-color:var(--accent); background:rgba(79,142,255,.06); }
+        .file-upload-label .icon {
+            width:34px; height:34px; border-radius:8px;
+            background:rgba(79,142,255,.15);
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; font-size:16px;
+        }
+        .file-upload-label .text-block { flex:1; min-width:0; }
+        .file-upload-label .text-block .title { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .file-upload-label .text-block .sub   { font-size:11px; color:var(--muted); margin-top:1px; }
+        input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
+
+        .divider { height:1px; background:var(--border); margin:24px 0; }
+
+        /* Submit btn */
+        .submit-btn {
+            width:100%; padding:15px;
+            background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
+            border:none; border-radius:12px; color:#fff;
+            font-family:'Syne',sans-serif; font-size:15px; font-weight:700;
+            letter-spacing:.04em; cursor:pointer;
+            transition:opacity .2s,transform .15s,box-shadow .2s;
+            box-shadow:0 4px 24px rgba(79,142,255,.25);
+            position:relative; overflow:hidden;
+        }
+        .submit-btn::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.15),transparent); opacity:0; transition:opacity .2s; }
+        .submit-btn:hover::after { opacity:1; }
+        .submit-btn:hover { box-shadow:0 6px 32px rgba(79,142,255,.4); transform:translateY(-1px); }
+        .submit-btn:active { transform:translateY(0); }
+        .submit-btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+
+        /* Loading */
+        #loading { display:none; margin-top:28px; text-align:center; }
+        .loading-inner {
+            display:inline-flex; align-items:center; gap:12px;
+            background:rgba(79,142,255,.08); border:1px solid rgba(79,142,255,.2);
+            border-radius:12px; padding:14px 22px;
+            color:var(--accent); font-size:14px; font-weight:500;
+        }
+        .spinner {
+            width:18px; height:18px;
+            border:2px solid rgba(79,142,255,.25); border-top-color:var(--accent);
+            border-radius:50%; animation:spin .75s linear infinite;
+        }
+
+        /* ── Result blocks ───────────────────────────────────── */
+        #result { margin-top:36px; }
+
+        .result-block {
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:18px;
+            padding:26px 30px;
+            margin-bottom:20px;
+            backdrop-filter:blur(12px);
+        }
+
+        /* Animation helper */
+        .anim-up {
+            opacity:0;
+            animation:fadeUp .55s ease both;
+            animation-delay: var(--delay, 0s);
+        }
+
+        /* Section title */
+        .section-title {
+            font-family:'Syne',sans-serif;
+            font-size:15px; font-weight:700;
+            letter-spacing:-.01em;
+            margin-bottom:16px;
+            display:flex; align-items:center; gap:8px;
+        }
+        .section-title .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+        .pill-count {
+            display:inline-flex; align-items:center; justify-content:center;
+            background:rgba(52,211,153,.15); color:var(--accent3);
+            font-size:11px; font-weight:600;
+            width:20px; height:20px; border-radius:50%;
+        }
+
+        /* ── Score card ─────────────────────────────────────── */
+        .score-card {
+            display:flex; align-items:center; gap:28px;
+            background:linear-gradient(135deg,rgba(79,142,255,.10),rgba(167,139,250,.07));
+            border-color:rgba(79,142,255,.2);
+        }
+        .score-ring-wrap { position:relative; flex-shrink:0; }
+        .score-overlay {
+            position:absolute; inset:0;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+        }
+        .score-num { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; line-height:1; }
+        .score-lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-top:3px; }
+        .score-right { flex:1; }
+        .score-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; margin-bottom:6px; }
+        .score-feedback { font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:16px; }
+
+        /* Stat bars */
+        .stats-stack { display:flex; flex-direction:column; gap:10px; }
+        .stat-row {}
+        .stat-meta { display:flex; justify-content:space-between; margin-bottom:5px; }
+        .stat-label { font-size:12px; color:var(--muted); }
+        .stat-value { font-size:12px; font-weight:600; }
+        .stat-track { height:5px; background:rgba(255,255,255,.07); border-radius:100px; overflow:hidden; }
+        .stat-fill { height:100%; border-radius:100px; background:var(--fill-color, #4f8eff); transition:width 1.1s cubic-bezier(0.4,0,0.2,1); }
+
+        /* ── Analysis card ───────────────────────────────────── */
+        .analysis-text {
+            font-size:14px; color:#c8cdd8;
+            line-height:1.7;
+            border-left:3px solid var(--accent);
+            padding-left:14px;
+        }
+
+        /* ── Matched skills ──────────────────────────────────── */
+        .match-tags { display:flex; flex-wrap:wrap; gap:8px; }
+        .match-tag {
+            display:inline-flex; align-items:center; gap:5px;
+            background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.25);
+            color:#6ee7b7; font-size:12px; font-weight:500;
+            padding:5px 12px; border-radius:100px;
+        }
+
+        /* ── Gap Analysis tabs ───────────────────────────────── */
+        .gap-tabs { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+        .gap-tab-btn {
+            display:inline-flex; align-items:center; gap:6px;
+            background:rgba(255,255,255,.04); border:1px solid var(--border);
+            border-radius:100px; padding:6px 14px;
+            color:var(--muted); font-family:'DM Sans',sans-serif;
+            font-size:13px; font-weight:500; cursor:pointer;
+            transition:background .2s, border-color .2s, color .2s;
+        }
+        .gap-tab-btn:hover { background:rgba(255,255,255,.07); color:var(--text); }
+        .gap-tab-btn.active { background:rgba(79,142,255,.12); border-color:rgba(79,142,255,.3); color:var(--text); }
+        .gap-tab-count {
+            background:rgba(255,255,255,.1); color:var(--muted);
+            font-size:10px; font-weight:600;
+            padding:1px 6px; border-radius:100px;
+        }
+
+        .gap-panels { }
+        .gap-panel { display:none; }
+        .gap-panel.active { display:flex; flex-direction:column; gap:10px; }
+
+        .gap-row { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+        .gap-pill {
+            display:inline-block;
+            background:color-mix(in srgb, var(--pill-color, #f87171) 12%, transparent);
+            border:1px solid color-mix(in srgb, var(--pill-color, #f87171) 28%, transparent);
+            color:var(--pill-color, #f87171);
+            font-size:12px; font-weight:500;
+            padding:4px 11px; border-radius:100px; flex-shrink:0;
+        }
+        .gap-resource { font-size:12px; color:var(--muted); line-height:1.4; }
+
+        /* ── YouTube ─────────────────────────────────────────── */
+        .yt-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:14px; }
+        .yt-card {
+            background:rgba(255,255,255,.03); border:1px solid var(--border);
+            border-radius:12px; overflow:hidden;
+            transition:transform .2s,border-color .2s,box-shadow .2s;
+            cursor:pointer; text-decoration:none; color:var(--text); display:block;
+        }
+        .yt-card:hover { transform:translateY(-3px); border-color:rgba(255,255,255,.16); box-shadow:0 8px 28px rgba(0,0,0,.35); }
+        .yt-thumb { position:relative; aspect-ratio:16/9; overflow:hidden; background:#111827; }
+        .yt-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s; }
+        .yt-card:hover .yt-thumb img { transform:scale(1.04); }
+        .play-overlay {
+            position:absolute; inset:0; background:rgba(0,0,0,.3);
+            display:flex; align-items:center; justify-content:center;
+            opacity:0; transition:opacity .2s;
+        }
+        .yt-card:hover .play-overlay { opacity:1; }
+        .play-btn { width:38px; height:38px; background:rgba(255,255,255,.9); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; }
+        .yt-info { padding:10px 12px 12px; }
+        .yt-info p { font-size:12px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+
+        /* Error */
+        .error-box {
+            background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.2);
+            border-radius:12px; padding:16px 20px;
+            color:var(--danger); font-size:14px;
+            display:flex; align-items:center; gap:10px;
+        }
+
+        /* ── Animations ──────────────────────────────────────── */
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:translateY(0)} }
+        @keyframes spin     { to{transform:rotate(360deg)} }
+
+        /* ── Responsive ──────────────────────────────────────── */
+        @media(max-width:580px) {
+            .form-grid    { grid-template-columns:1fr; }
+            .form-card    { padding:24px 20px; }
+            .score-card   { flex-direction:column; align-items:flex-start; gap:16px; }
+            .result-block { padding:20px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+    <!-- Header -->
+    <div class="header">
+        <a href="/about" class="about-link">← About Page</a>
+        <div class="badge">✦ AI Powered</div>
+        <h1>SmartHire Engine</h1>
+        <p>Generative AI · Job Fit Analysis · Skill Gap Detection · Learning Paths</p>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+        <form id="uploadForm">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" required>
+                </div>
+
+                <div class="form-group full">
+                    <label for="education">Highest Education Level</label>
+                    <select id="education" name="education" required>
+                        <option value="" disabled selected>Select Education Level</option>
+                        <option value="bachelor">Bachelor's Degree</option>
+                        <option value="master">Master's Degree</option>
+                        <option value="phd">PhD</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Resume</label>
+                    <div class="file-upload-wrap">
+                        <label class="file-upload-label" id="resumeLabel">
+                            <div class="icon">📄</div>
+                            <div class="text-block">
+                                <div class="title">Upload Resume</div>
+                                <div class="sub">PDF or DOCX</div>
+                            </div>
+                        </label>
+                        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Job Description</label>
+                    <div class="file-upload-wrap">
+                        <label class="file-upload-label" id="jdLabel">
+                            <div class="icon">💼</div>
+                            <div class="text-block">
+                                <div class="title">Upload JD</div>
+                                <div class="sub">PDF or DOCX</div>
+                            </div>
+                        </label>
+                        <input type="file" id="jd" name="jd" accept=".pdf,.doc,.docx" required>
+                    </div>
+                </div>
+
+            </div><!-- /form-grid -->
+
+            <div class="divider"></div>
+
+            <button type="submit" class="submit-btn">Analyze My Profile →</button>
+
+            <div id="loading">
+                <div class="loading-inner">
+                    <div class="spinner"></div>
+                    Analyzing resume against job description…
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Results injected here -->
+    <div id="result"></div>
+
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

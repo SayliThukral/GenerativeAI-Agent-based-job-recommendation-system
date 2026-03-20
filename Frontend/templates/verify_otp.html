@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHire Engine — Verify OTP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:        #0b0f1a;
+            --surface:   rgba(255,255,255,0.04);
+            --border:    rgba(255,255,255,0.08);
+            --accent:    #4f8eff;
+            --accent2:   #a78bfa;
+            --accent3:   #34d399;
+            --text:      #e8eaf0;
+            --muted:     #6b7280;
+            --danger:    #f87171;
+            --shadow:    0 8px 32px rgba(0,0,0,0.4);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'DM Sans',sans-serif;
+            background:var(--bg); color:var(--text);
+            min-height:100vh;
+            display:flex; align-items:center; justify-content:center;
+            padding:24px; overflow-x:hidden;
+        }
+        body::before {
+            content:''; position:fixed; inset:0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,142,255,.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(167,139,250,.10) 0%, transparent 55%);
+            pointer-events:none; z-index:0;
+        }
+        body::after {
+            content:''; position:fixed; inset:0;
+            background-image:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+            background-size:48px 48px;
+            pointer-events:none; z-index:0;
+        }
+
+        /* ── Auth card ─────────────────────────────────── */
+        .auth-card {
+            position:relative; z-index:1;
+            width:100%; max-width:400px;
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:22px;
+            padding:40px 36px;
+            backdrop-filter:blur(16px);
+            box-shadow:var(--shadow);
+            animation:fadeUp .65s ease both;
+        }
+
+        /* Brand / icon header */
+        .brand { text-align:center; margin-bottom:28px; }
+        .icon-wrap {
+            width:56px; height:56px; border-radius:16px;
+            background:rgba(79,142,255,.12); border:1px solid rgba(79,142,255,.22);
+            display:flex; align-items:center; justify-content:center;
+            font-size:24px; margin:0 auto 18px;
+        }
+        .brand h1 {
+            font-family:'Syne',sans-serif;
+            font-size:1.55rem; font-weight:800; letter-spacing:-.03em;
+            background:linear-gradient(135deg,#fff 0%,#a3b8ff 60%,#a78bfa 100%);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .brand p { margin-top:8px; color:var(--muted); font-size:13px; line-height:1.6; }
+        .brand .email-chip {
+            display:inline-block; margin-top:10px;
+            background:rgba(79,142,255,.10); border:1px solid rgba(79,142,255,.2);
+            color:var(--accent); font-size:12px; font-weight:500;
+            padding:4px 12px; border-radius:100px;
+            word-break:break-all;
+        }
+
+        .sect-divider { height:1px; background:var(--border); margin:0 0 26px; }
+
+        /* OTP boxes */
+        .otp-label {
+            font-size:11px; font-weight:500;
+            letter-spacing:.07em; text-transform:uppercase;
+            color:var(--muted); display:block; margin-bottom:12px;
+            text-align:center;
+        }
+        .otp-boxes {
+            display:flex; justify-content:center; gap:10px; margin-bottom:24px;
+        }
+        .otp-boxes input {
+            width:48px; height:54px;
+            background:rgba(255,255,255,.06); border:1px solid var(--border);
+            border-radius:12px;
+            text-align:center; font-family:'Syne',sans-serif;
+            font-size:22px; font-weight:700; color:var(--text);
+            outline:none; caret-color:var(--accent);
+            transition:border-color .2s, background .2s, box-shadow .2s;
+            /* remove number arrows */
+            -moz-appearance:textfield;
+        }
+        .otp-boxes input::-webkit-outer-spin-button,
+        .otp-boxes input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+        .otp-boxes input:focus {
+            border-color:var(--accent); background:rgba(79,142,255,.08);
+            box-shadow:0 0 0 3px rgba(79,142,255,.14);
+        }
+        .otp-boxes input.filled {
+            border-color:rgba(52,211,153,.45); background:rgba(52,211,153,.06);
+        }
+
+        /* Hidden real input */
+        #otpHidden { display:none; }
+
+        /* Timer */
+        .timer-row {
+            text-align:center; margin-bottom:20px;
+            font-size:13px; color:var(--muted);
+        }
+        .timer-row #countdown { color:var(--accent); font-weight:600; }
+        .timer-row #resendBtn {
+            display:none; background:none; border:none;
+            color:var(--accent); font-family:'DM Sans',sans-serif;
+            font-size:13px; font-weight:600; cursor:pointer;
+            text-decoration:underline; padding:0;
+        }
+        .timer-row #resendBtn:hover { opacity:.8; }
+
+        /* Submit button */
+        .btn-primary {
+            width:100%; padding:13px;
+            background:linear-gradient(135deg,var(--accent),var(--accent2));
+            border:none; border-radius:11px; color:#fff;
+            font-family:'Syne',sans-serif; font-size:14px; font-weight:700;
+            letter-spacing:.04em; cursor:pointer;
+            box-shadow:0 4px 20px rgba(79,142,255,.25);
+            transition:transform .15s, box-shadow .2s, opacity .2s;
+            position:relative; overflow:hidden;
+        }
+        .btn-primary::after {
+            content:''; position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);
+            opacity:0; transition:opacity .2s;
+        }
+        .btn-primary:hover::after { opacity:1; }
+        .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 28px rgba(79,142,255,.4); }
+        .btn-primary:active { transform:translateY(0); }
+        .btn-primary:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+
+        /* Links */
+        .link-row { text-align:center; font-size:13px; color:var(--muted); margin-top:20px; }
+        .link-row a { color:var(--accent); text-decoration:none; font-weight:500; }
+        .link-row a:hover { opacity:.8; }
+
+        /* Flash */
+        .flash { border-radius:10px; padding:12px 16px; font-size:13px; margin-bottom:18px; }
+        .flash.error   { background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.2); color:var(--danger); }
+        .flash.success { background:rgba(52,211,153,.08);  border:1px solid rgba(52,211,153,.2);  color:#34d399; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+
+    <div class="brand">
+        <div class="icon-wrap">✉️</div>
+        <h1>Verify OTP</h1>
+        <p>We've sent a 6-digit code to</p>
+        <span class="email-chip">{{ email }}</span>
+    </div>
+
+    <div class="sect-divider"></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form action="/verify-otp" method="post" id="otpForm">
+        <input type="hidden" name="email" value="{{ email }}">
+        <input type="hidden" name="otp"   id="otpHidden">
+
+        <label class="otp-label">Enter 6-digit code</label>
+
+        <!-- Visual OTP boxes (JS assembles into hidden field) -->
+        <div class="otp-boxes" id="otpBoxes">
+            <input type="number" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+            <input type="number" maxlength="1" inputmode="numeric">
+            <input type="number" maxlength="1" inputmode="numeric">
+            <input type="number" maxlength="1" inputmode="numeric">
+            <input type="number" maxlength="1" inputmode="numeric">
+            <input type="number" maxlength="1" inputmode="numeric">
+        </div>
+
+        <div class="timer-row">
+            Code expires in <span id="countdown">2:00</span>
+            <button type="button" id="resendBtn" onclick="resendOtp()">Resend OTP</button>
+        </div>
+
+        <button type="submit" class="btn-primary" id="verifyBtn" disabled>Verify OTP →</button>
+
+    </form>
+
+    <div class="link-row">
+        <a href="/forgot-password">← Change email</a>
+    </div>
+
+</div>
+
+<script>
+// ── OTP box behaviour ──────────────────────────────────────────────────────
+const boxes   = Array.from(document.querySelectorAll("#otpBoxes input"));
+const hidden  = document.getElementById("otpHidden");
+const verifyBtn = document.getElementById("verifyBtn");
+
+function syncHidden() {
+    const val = boxes.map(b => b.value).join("");
+    hidden.value = val;
+    verifyBtn.disabled = val.length < 6;
+    boxes.forEach(b => b.classList.toggle("filled", b.value !== ""));
+}
+
+boxes.forEach((box, i) => {
+    box.addEventListener("input", e => {
+        // Allow only single digit
+        box.value = box.value.replace(/[^0-9]/g, "").slice(-1);
+        syncHidden();
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+    });
+
+    box.addEventListener("keydown", e => {
+        if (e.key === "Backspace" && !box.value && i > 0) {
+            boxes[i - 1].value = "";
+            boxes[i - 1].focus();
+            syncHidden();
+        }
+    });
+
+    // Handle paste on first box
+    box.addEventListener("paste", e => {
+        e.preventDefault();
+        const digits = (e.clipboardData.getData("text") || "").replace(/\D/g,"").slice(0,6);
+        digits.split("").forEach((d, j) => { if (boxes[j]) boxes[j].value = d; });
+        syncHidden();
+        const next = Math.min(digits.length, boxes.length - 1);
+        boxes[next].focus();
+    });
+});
+
+// ── Countdown timer ─────────────────────────────────────────────────────────
+let secs = 120;
+const countEl  = document.getElementById("countdown");
+const resendBtn = document.getElementById("resendBtn");
+
+const timer = setInterval(() => {
+    secs--;
+    if (secs <= 0) {
+        clearInterval(timer);
+        countEl.style.display   = "none";
+        resendBtn.style.display = "inline";
+        return;
+    }
+    const m = Math.floor(secs / 60);
+    const s = String(secs % 60).padStart(2,"0");
+    countEl.textContent = `${m}:${s}`;
+    if (secs <= 30) countEl.style.color = "var(--danger)";
+}, 1000);
+
+function resendOtp() {
+    // POST to resend endpoint — adjust URL to match your backend
+    fetch("/send-otp", {
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:"email=" + encodeURIComponent("{{ email }}")
+    }).then(() => {
+        resendBtn.style.display = "none";
+        countEl.style.display   = "inline";
+        countEl.style.color     = "var(--accent)";
+        secs = 120;
+        // restart visual countdown
+        const rt = setInterval(() => {
+            secs--;
+            if (secs <= 0) { clearInterval(rt); resendBtn.style.display="inline"; countEl.style.display="none"; return; }
+            const m = Math.floor(secs/60), s = String(secs%60).padStart(2,"0");
+            countEl.textContent = `${m}:${s}`;
+            if (secs <= 30) countEl.style.color = "var(--danger)";
+        }, 1000);
+    });
+}
+</script>
+
+</body>
+</html>
