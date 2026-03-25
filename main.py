@@ -1,10 +1,15 @@
 import os
-from fastapi import FastAPI, File, UploadFile, Request
+from fastapi import FastAPI, File, UploadFile, Request,Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from src.app import Pipeline
+from database import create_table
+from fastapi.responses import RedirectResponse
+from database import get_db
 
 app = FastAPI()
+
+create_table()
 
 # Create temp folder
 os.makedirs("temp", exist_ok=True)
@@ -32,14 +37,77 @@ def dashboard(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 @app.get("/login")
-def login(request: Request):
-    messages = []  
-    return templates.TemplateResponse("login.html", {"request": request, "messages": messages})
+def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {
+        "request": request,
+        "messages": []
+    })
+
+@app.post("/login")
+def login(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...)
+):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    user = cursor.execute("""
+        SELECT * FROM users WHERE email = ?
+    """, (email,)).fetchone()
+
+    if user and user["password"] == password:
+        return RedirectResponse("/dashboard", status_code=303)
+    else:
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "messages": [("error", "Invalid email or password")]
+        })
 
 @app.get("/signup")
-def signup(request: Request):
-    messages = []
-    return templates.TemplateResponse("signup.html", {"request": request, "messages": messages})
+def signup_page(request: Request):
+    return templates.TemplateResponse("signup.html", {
+        "request": request,
+        "messages": []
+    })
+
+@app.post("/signup")
+def signup(
+    request: Request,
+    username: str = Form(...),
+    name: str = Form(...),
+    email: str = Form(...),
+    mobile: str = Form(None),
+    password: str = Form(...),
+    confirm_password: str = Form(...)
+):
+    if password != confirm_password:
+        return templates.TemplateResponse("signup.html", {
+            "request": request,
+            "messages": [("error", "Passwords do not match")]
+        })
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        INSERT INTO users (username, name, email, mobile, password)
+        VALUES (?, ?, ?, ?, ?)
+        """, (username, name, email, mobile, password))
+
+        conn.commit()
+
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "messages": [("success", "Account created! Please login.")]
+        })
+
+    except:
+        return templates.TemplateResponse("signup.html", {
+            "request": request,
+            "messages": [("error", "Email already exists")]
+        })
 
 @app.get("/forgot-password")
 def forgot_password(request: Request):
