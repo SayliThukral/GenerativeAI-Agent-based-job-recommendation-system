@@ -6,6 +6,8 @@ from src.app import Pipeline
 from database import create_table
 from fastapi.responses import RedirectResponse
 from database import get_db
+from fastapi.templating import Jinja2Templates
+
 
 app = FastAPI()
 
@@ -153,7 +155,8 @@ async def upload_files(
             "gap_analysis": result.get("gap_analysis"),
             
             "mismatched_items": result.get("mismatched_items"),
-            "youtube_recommendations": result.get("youtube_recommendations")
+            "youtube_recommendations": result.get("youtube_recommendations"),
+            "job_recommendations": result.get("job_recommendations")
         }
 
     except Exception as e:

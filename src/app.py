@@ -10,6 +10,7 @@ if sys.platform == 'win32':
 
 from src.services.ats_service import ATSservice
 from src.services.document_service import DocumentService
+from src.services.job_agent_service import get_job_recommendations
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -101,6 +102,7 @@ class Pipeline:
             if not ats_score["analysis"] or not str(ats_score["analysis"]).strip():
                 ats_score["analysis"] = "Analysis unavailable for this submission."
 
+
             # ── 5. Gap analysis ───────────────────────────────────────────────
             # Strip category prefixes in Python — saves LLM tokens + more reliable
             raw_missing   = ats_score["mismatched_items"]
@@ -142,6 +144,12 @@ class Pipeline:
                 raw_youtube if isinstance(raw_youtube, dict) else {}
             )
 
+            skills = cv_items.get("skills", []) if isinstance(cv_items, dict) else []
+            experience = cv_items.get("experience", []) if isinstance(cv_items, dict) else []
+
+            job_recommendations = get_job_recommendations(skills, experience)
+
+            ats_score["job_recommendations"] = job_recommendations
             return ats_score
 
         except Exception as e:

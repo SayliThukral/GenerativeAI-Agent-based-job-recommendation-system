@@ -25,9 +25,9 @@ class ATSservice:
                 system_prompt=CV_SYSTEM_PROMPT,
                 user_prompt=CV_USER_PROMPT.format(raw_text=ocr_text),
                 json_response=True,
-                # response_model=ATSResult
+                
             )
-            
+          
             return response["response"]
 
         except Exception as e:
