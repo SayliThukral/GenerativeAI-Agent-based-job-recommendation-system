@@ -3,6 +3,7 @@ from langchain.agents import create_agent
 from langchain_openai import ChatOpenAI
 from src.services.job_agent_tools import search_jobs
 from dotenv import load_dotenv
+import json
 
 load_dotenv()
 
@@ -46,3 +47,5 @@ def get_job_recommendations(skills: list, experience: list) -> str:
     })
 
     return response["messages"][-1].content
+
+   

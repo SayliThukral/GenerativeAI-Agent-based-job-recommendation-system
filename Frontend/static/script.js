@@ -281,6 +281,31 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
             }
         }
 
+    // ── Job cards ─────────────────────────────────────────────────────
+    let jobCardsHtml = "";
+    let hasJobs = false;
+
+    if (Array.isArray(data.job_recommendations) && data.job_recommendations.length) {
+        hasJobs = true;
+
+        data.jobs.forEach(job => {
+            jobCardsHtml += `
+                <a href="${job.link}" target="_blank" class="yt-card">
+                    <div class="yt-thumb">
+                        <img src="https://via.placeholder.com/300x180?text=Job" />
+                        <div class="play-overlay">
+                            <div class="play-btn">→</div>
+                        </div>
+                        </div>
+                <div class="yt-info">
+                    <p><strong>${job.title}</strong></p>
+                    <p>🏢 ${job.company}</p>
+                    <p>📍 ${job.location}</p>
+                </div>
+            </a>`;
+    });
+}
+
         // ── Total gap count ───────────────────────────────────────────────────
         const totalGaps =
             (gapData.skills     || []).length +
@@ -289,7 +314,6 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
 
         // ── Render ────────────────────────────────────────────────────────────
         document.getElementById("result").innerHTML = `
-
           <!-- ① SCORE + SUB-SCORES -->
           <div class="result-block score-card anim-up" style="--delay:0s">
             <div class="score-ring-wrap">
@@ -355,8 +379,19 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
             ${hasVideos
               ? `<div class="yt-grid">${ytCardsHtml}</div>`
               : `<p style="color:var(--muted);font-size:14px;">No video recommendations available.</p>`}
-          </div>`;
+          </div>
 
+          <!-- ⑥ JOB RECOMMENDATIONS -->
+         <div class="result-block yt-section anim-up" style="--delay:0.32s">
+            <div class="section-title">
+                <span class="dot" style="background:#34d399"></span>
+                Job Recommendations
+            </div>
+            ${hasJobs
+                ? `<div class="yt-grid">${jobCardsHtml}</div>`
+                : `<p style="color:var(--muted);font-size:14px;">No job recommendations available.</p>`}
+        </div>
+            `;
         // ── Trigger animations after DOM is ready ─────────────────────────────
         requestAnimationFrame(() => {
             animateRing(mainRing.id, mainRing.circ, mainRing.filled);
