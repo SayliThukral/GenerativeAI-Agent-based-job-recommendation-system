@@ -1,51 +1,34 @@
-from langchain.tools import tool
-from langchain.agents import create_agent
-from langchain_openai import ChatOpenAI
-from src.services.job_agent_tools import search_jobs
+import re
+from src.services.job_agent_tools import search_jobs_structured
 from dotenv import load_dotenv
-import json
+from src.services.job_agent_tools import search_jobs_structured, search_jobs_structured_custom_query
 
 load_dotenv()
 
-model = ChatOpenAI(
-    model="gpt-4o",
-    temperature=0,
-    max_tokens=1000,
-    
-)
+def clean_experience_string(exp_string: str) -> str:
+    """Extracts just the years of experience or simplifies the string."""
+    # Example: Grabs just the "0-2 years" or "entry-level" part
+    # A simple split to remove the actionable advice after the hyphen
+    clean_str = exp_string.split(" - ")[0].strip()
+    return clean_str
 
-@tool
-def job_tool(input_text: str) -> str:
-    """
-    Use this tool to find jobs.
-    Input format: skills and experience clearly mentioned.
-    Example: "Skills: python, machine learning. Experience: 2 years"
-    """
+def get_job_recommendations(skills: list, experience: list) -> list:
+    # 1. Clean the skills
+    skills_str = ", ".join(skills) if skills else "software developer"
     
-    try:
-        # Simple extraction (safe parsing)
-        parts = input_text.lower().split("experience:")
+    # 2. Extract a safe experience term (fallback to empty string if it's weird)
+    exp_term = ""
+    if experience:
+        first_exp = experience[0].split(" - ")[0].strip().lower()
+        # Only use it if it contains words like 'year', 'month', 'entry', 'senior', 'junior'
+        if any(keyword in first_exp for keyword in ['year', 'month', 'entry', 'junior', 'senior', 'level']):
+            exp_term = first_exp
+    
+    # 3. Construct a smarter query
+    if exp_term:
+        query = f"{skills_str} jobs {exp_term} experience"
+    else:
+        # If the LLM gave us garbage like "Master's degree", just search by skills
+        query = f"{skills_str} jobs" 
         
-        skills_part = parts[0].replace("skills:", "").strip()
-        experience_part = parts[1].strip()
-
-        return search_jobs(skills_part, experience_part)
-
-    except:
-        return "❌ Please enter input like: Skills: python, ML. Experience: 2 years"
-
-
-def get_job_recommendations(skills: list, experience: list) -> str:
-    agent = create_agent(model, tools=[job_tool])
-    
-    query = f"Skills: {', '.join(skills)}. Experience: {', '.join(experience)}"
-    
-    response = agent.invoke({
-        "messages": [
-            {"role": "user", "content": query}
-        ]
-    })
-
-    return response["messages"][-1].content
-
-   
+    return search_jobs_structured_custom_query(query)

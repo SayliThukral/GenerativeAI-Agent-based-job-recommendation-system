@@ -68,3 +68,48 @@ button:hover
 .top-link{
 text-align:right;
 }
+
+/* ───── JOB RECOMMENDATIONS ───── */
+
+.job-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+    gap: 14px;
+    margin-top: 15px;
+}
+
+.job-card {
+    background: #f9fbff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 14px;
+    transition: 0.2s;
+}
+
+.job-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.job-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.job-meta {
+    font-size: 13px;
+    color: gray;
+    margin-bottom: 6px;
+}
+
+.job-btn {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 6px 10px;
+    background: #2e6bd3;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 12px;
+}

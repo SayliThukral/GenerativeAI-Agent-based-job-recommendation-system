@@ -281,14 +281,30 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
             }
         }
 
-    // ── Job cards ─────────────────────────────────────────────────────
+        // ── Job cards ──────────────────────────────────────────────────────
     let jobCardsHtml = "";
     let hasJobs = false;
 
-    if (Array.isArray(data.job_recommendations) && data.job_recommendations.length) {
+    // 🛠️ NAYA FIX: Ensure karte hain ki data proper Array format mein hi ho
+    let jobsArray = data.job_recommendations;
+    
+    // Agar backend ne data galti se 'String' bhej diya hai, toh pehle usko Array me convert karo
+    if (typeof jobsArray === "string") {
+        try {
+            // Python ke single quotes ko JSON ke double quotes me badal kar parse karo
+            let cleanString = jobsArray.replace(/'/g, '"');
+            jobsArray = JSON.parse(cleanString);
+        } catch (e) {
+            console.error("Job data parse nahi ho paya:", e);
+            jobsArray = []; // Fallback to empty array
+        }
+    }
+
+    // Ab properly check karo ki jobsArray ek Array hai ya nahi
+    if (Array.isArray(jobsArray) && jobsArray.length > 0) {
         hasJobs = true;
 
-        data.jobs.forEach(job => {
+        jobsArray.forEach(job => {
             jobCardsHtml += `
                 <a href="${job.link}" target="_blank" class="yt-card">
                     <div class="yt-thumb">
@@ -296,15 +312,15 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
                         <div class="play-overlay">
                             <div class="play-btn">→</div>
                         </div>
-                        </div>
-                <div class="yt-info">
-                    <p><strong>${job.title}</strong></p>
-                    <p>🏢 ${job.company}</p>
-                    <p>📍 ${job.location}</p>
-                </div>
-            </a>`;
-    });
-}
+                    </div>
+                    <div class="yt-info">
+                        <p><strong>${job.title}</strong></p>
+                        <p>🏢 ${job.company}</p>
+                        <p>📍 ${job.location}</p>
+                    </div>
+                </a>`;
+        });
+    }
 
         // ── Total gap count ───────────────────────────────────────────────────
         const totalGaps =

@@ -144,9 +144,9 @@ class Pipeline:
                 raw_youtube if isinstance(raw_youtube, dict) else {}
             )
 
-            skills = cv_items.get("skills", []) if isinstance(cv_items, dict) else []
-            experience = cv_items.get("experience", []) if isinstance(cv_items, dict) else []
-
+            skills = ats_score.get("matched_skills", [])
+            experience = ats_score.get("gap_analysis", {}).get("experience", [])
+            
             job_recommendations = get_job_recommendations(skills, experience)
 
             ats_score["job_recommendations"] = job_recommendations
