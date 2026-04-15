@@ -16,7 +16,7 @@ def get_youtube_tutorials_for_gaps(domain):
         "X-API-KEY": os.getenv("SERPER_API_KEY"),
         "Content-Type": "application/json"
     }
-    
+    #import pdb;pdb.set_trace()
     # Construct a search query focused strictly on YouTube results
     query = f"{domain} resume formatting tutorial site:youtube.com"
     payload = json.dumps({
@@ -53,3 +53,6 @@ def get_youtube_tutorials_for_gaps(domain):
         recommendations["error"] = "Failed to fetch video recommendations."
                 
     return recommendations
+domain="machine learning"
+raw_youtube = get_youtube_tutorials_for_gaps(domain)
+print(raw_youtube)

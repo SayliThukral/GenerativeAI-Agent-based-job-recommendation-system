@@ -1,3 +1,14 @@
+function loadJobLogo(imgEl, domain, initials, bgColor) {
+    // Remove the '#' for the UI Avatars API URL
+    const cleanColor = bgColor.replace('#', '');
+    
+    imgEl.onerror = function() {
+        // Clearbit failed. Use UI-Avatars to generate an image with initials.
+        imgEl.onerror = null; // Prevent infinite loops if the fallback also fails
+        imgEl.src = `https://ui-avatars.com/api/?name=${initials}&background=${cleanColor}&color=fff&size=128&rounded=false&font-size=0.4`;
+    };
+    imgEl.src = "https://logo.clearbit.com/" + domain;
+}
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function getVideoId(url) {
@@ -305,21 +316,49 @@ document.getElementById("uploadForm").addEventListener("submit", async function 
         hasJobs = true;
 
         jobsArray.forEach(job => {
-            jobCardsHtml += `
-                <a href="${job.link}" target="_blank" class="yt-card">
-                    <div class="yt-thumb">
-                        <img src="https://via.placeholder.com/300x180?text=Job" />
-                        <div class="play-overlay">
-                            <div class="play-btn">→</div>
-                        </div>
-                    </div>
-                    <div class="yt-info">
-                        <p><strong>${job.title}</strong></p>
-                        <p>🏢 ${job.company}</p>
-                        <p>📍 ${job.location}</p>
-                    </div>
-                </a>`;
-        });
+    // Domain nikalo company name se
+    const domainMap = {
+        "handshake": "joinhandshake.com",
+        "robert half": "roberthalf.com",
+        "ensemble health": "ensemblehp.com",
+        "q1 technologies": "q1tech.com",
+    };
+    const companyLower = (job.company || "").toLowerCase();
+    const domain = Object.keys(domainMap).find(k => companyLower.includes(k))
+        ? domainMap[Object.keys(domainMap).find(k => companyLower.includes(k))]
+        : companyLower.replace(/[^a-z0-9]/g, "").slice(0, 15) + ".com";
+
+    // Initials fallback
+    const initials = (job.company || "?").split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+    const colors = ["#4f46e5","#0ea5e9","#8b5cf6","#10b981","#f59e0b"];
+    let hash = 0;
+    for (let c of (job.company || "")) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+    const bgColor = colors[Math.abs(hash) % colors.length];
+
+    const imgId = "logo_" + Math.random().toString(36).slice(2);
+
+     jobCardsHtml += `
+    <a href="${job.link}" target="_blank" class="yt-card">
+        <div class="yt-thumb"
+             style="display:flex;align-items:center;justify-content:center;background:#141c2e;">
+            <img id="${imgId}"
+                 alt="${job.company}"
+                 style="max-width:80px;max-height:60px;object-fit:contain;border-radius:10px;"/>
+            <div class="play-overlay"><div class="play-btn">→</div></div>
+        </div>
+        <div class="yt-info">
+            <p><strong>${job.title}</strong></p>
+            <p>🏢 ${job.company}</p>
+            <p>📍 ${job.location}</p>
+        </div>
+    </a>`;
+
+    // Card render hone ke baad logo load karo
+    setTimeout(() => {
+        const imgEl = document.getElementById(imgId);
+        if (imgEl) loadJobLogo(imgEl, domain, initials, bgColor);
+    }, 100);
+});
     }
 
         // ── Total gap count ───────────────────────────────────────────────────

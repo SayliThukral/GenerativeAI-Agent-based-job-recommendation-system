@@ -147,7 +147,7 @@ class Pipeline:
             skills = ats_score.get("matched_skills", [])
             experience = ats_score.get("gap_analysis", {}).get("experience", [])
             
-            job_recommendations = get_job_recommendations(skills, experience)
+            job_recommendations = get_job_recommendations(domain, skills, experience)
 
             ats_score["job_recommendations"] = job_recommendations
             return ats_score

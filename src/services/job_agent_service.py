@@ -12,7 +12,10 @@ def clean_experience_string(exp_string: str) -> str:
     clean_str = exp_string.split(" - ")[0].strip()
     return clean_str
 
-def get_job_recommendations(skills: list, experience: list) -> list:
+def get_job_recommendations(domain: str, skills: list, experience: list) -> list:
+    print("Domain input:", domain)
+    print("Skills input:", skills)
+    print("Experience input:", experience)
     # 1. Clean the skills
     skills_str = ", ".join(skills) if skills else "software developer"
     
@@ -31,4 +34,11 @@ def get_job_recommendations(skills: list, experience: list) -> list:
         # If the LLM gave us garbage like "Master's degree", just search by skills
         query = f"{skills_str} jobs" 
         
-    return search_jobs_structured_custom_query(query)
+    #return search_jobs_structured_custom_query(query)
+    jobs = search_jobs_structured(
+    skills=skills,
+    experience=experience,
+    domain=domain  
+    )
+   
+    return jobs
