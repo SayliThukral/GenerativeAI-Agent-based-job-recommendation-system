@@ -313,9 +313,6 @@
         .yt-info { padding:10px 12px 12px; }
         .yt-info p { font-size:12px; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 
-        
-        
-
         /* Error */
         .error-box {
             background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.2);
@@ -342,15 +339,16 @@
 
 <div class="page-wrap">
 
-    <!-- Header -->
     <div class="header">
-        <a href="/about" class="about-link">← About Page</a>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <a href="/about" class="about-link">← About Page</a>
+            <a href="/logout" class="about-link" style="color: var(--danger);">Logout</a>
+        </div>
         <div class="badge">✦ AI Powered</div>
         <h1>SmartHire Engine</h1>
         <p>Generative AI · Job Fit Analysis · Skill Gap Detection · Learning Paths</p>
     </div>
 
-    <!-- Form -->
     <div class="form-card">
         <form id="uploadForm">
             <div class="form-grid">
@@ -403,9 +401,7 @@
                     </div>
                 </div>
 
-            </div><!-- /form-grid -->
-
-            <div class="divider"></div>
+            </div><div class="divider"></div>
 
             <button type="submit" class="submit-btn">Analyze My Profile →</button>
 
@@ -419,7 +415,6 @@
         </form>
     </div>
 
-    <!-- Results injected here -->
     <div id="result"></div>
 
 </div>

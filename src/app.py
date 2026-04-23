@@ -71,6 +71,7 @@ class Pipeline:
 
             # ── 2. Parse CV + JD into structured data ─────────────────────────
             cv_items = await self.ats_service.extract_cv_items(cv_text)
+            print("CV ITEMS:", cv_items)
             jd_items = await self.ats_service.extract_jd_items(jd_text)
 
             # ── 3. Extract domain (used in stages 4 + 5) ──────────────────────
@@ -145,7 +146,8 @@ class Pipeline:
             )
 
             skills = ats_score.get("matched_skills", [])
-            experience = ats_score.get("gap_analysis", {}).get("experience", [])
+            #experience = ats_score.get("gap_analysis", {}).get("experience", [])
+            experience = ats_score.get("Experience", [])
             
             job_recommendations = get_job_recommendations(domain, skills, experience)
 

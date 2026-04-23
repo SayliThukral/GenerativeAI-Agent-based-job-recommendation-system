@@ -23,6 +23,8 @@
             background:var(--bg); color:var(--text);
             min-height:100vh;
             overflow-x:hidden;
+            display: flex;
+            flex-direction: column;
         }
         body::before {
             content:''; position:fixed; inset:0;
@@ -45,13 +47,29 @@
             position:relative; z-index:1;
             max-width:760px; margin:0 auto;
             padding:52px 24px 80px;
+            flex: 1;
         }
 
-        /* Back link */
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 44px;
+        }
+
+        /* Right side links container */
+        .right-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-left: auto;
+        }
+
+        /* Back link style */
         .back-link {
             display:inline-flex; align-items:center; gap:6px;
             color:var(--muted); font-size:13px; text-decoration:none;
-            margin-bottom:44px;
             transition:color .2s;
         }
         .back-link:hover { color:var(--accent); }
@@ -130,23 +148,56 @@
         }
         .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 28px rgba(79,142,255,.4); }
 
+        /* Footer */
+        .custom-footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 14px;
+            animation:fadeUp .7s .3s ease both;
+        }
+        .custom-footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .custom-footer a:hover {
+            color: var(--accent2);
+        }
+
         @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:translateY(0)} }
         @keyframes fadeUp   { from{opacity:0;transform:translateY(18px)}  to{opacity:1;transform:translateY(0)} }
+     
     </style>
 </head>
 <body>
 <div class="page-wrap">
 
-    <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+    
+    <div class="top-nav">  
+        <div class="right-nav">
+            <a href="/pricing" class="back-link">Pricing</a>
+            
+            {% if is_logged_in %}
+                <a href="/dashboard" class="back-link">Dashboard</a>
+                <a href="/logout" class="back-link" style="color: #f87171;">Logout</a>
+            {% else %}
+                <a href="/login" class="back-link">Login</a>
+                <a href="/signup" class="back-link">Sign Up</a>
+            {% endif %}
+            
+        </div>
+    </div>
 
-    <!-- Hero -->
     <div class="hero">
         <div class="badge">✦ About SmartHire</div>
         <h1>Hire Smarter.<br>Grow Faster.</h1>
         <p>SmartHire Engine is a Generative AI-powered career analysis platform that matches candidate profiles with relevant job opportunities and surfaces actionable skill gaps.</p>
     </div>
 
-    <!-- Feature cards -->
     <div class="features">
         <div class="feat-card">
             <div class="feat-icon" style="background:rgba(79,142,255,.12)">🤖</div>
@@ -180,7 +231,6 @@
         </div>    
     </div>
 
-    <!-- About text -->
     <div class="about-block">
         <h2><span class="dot"></span>Our Mission</h2>
         <p>
@@ -193,9 +243,12 @@
         </p>
     </div>
 
-    <!-- CTA -->
     <div class="cta-row">
         <a href="/dashboard" class="btn-primary">Analyze My Profile →</a>
+    </div>
+
+    <div class="custom-footer">
+        Contact Us: <a href="mailto:saylithukral@gmail.com">saylithukral@gmail.com</a>
     </div>
 
 </div>
