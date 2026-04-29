@@ -1,0 +1,189 @@
+:root {
+  --bg: #0b0f1a;
+  --surface: rgba(255,255,255,0.04);
+  --surface-hover: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08);
+  --accent: #4f8eff;
+  --accent2: #a78bfa;
+  --accent3: #34d399;
+  --danger: #f87171;
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* BACKGROUND */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(79,142,255,.15), transparent 60%),
+    radial-gradient(circle at 80% 80%, rgba(167,139,250,.12), transparent 60%);
+  z-index:0;
+}
+
+/* NAVIGATION WALA HISSA */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
+  margin: 0 auto; /* Center karne ke liye */
+  padding: 40px 20px 0; 
+  position: relative;
+  z-index: 10;
+}
+
+.back-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.pricing-link {
+  color: var(--accent2);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+.pricing-link:hover {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(167,139,250,0.5);
+}
+
+/* HERO */
+.hero {
+  text-align:center;
+  padding:40px 20px 40px;
+  position:relative;
+  z-index:2;
+}
+
+.hero h1 {
+  font-family:'Syne',sans-serif;
+  font-size:42px;
+  font-weight:800;
+  background:linear-gradient(135deg,#fff,#a3b8ff,#a78bfa);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.hero p {
+  color:var(--muted);
+  margin-top:10px;
+}
+
+/* CARDS */
+.cards-wrapper {
+  display:flex;
+  justify-content:center;
+  gap:25px;
+  padding:40px;
+  flex-wrap:wrap;
+  position:relative;
+  z-index:2;
+}
+
+.card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  backdrop-filter: blur(16px);
+  padding:25px;
+  width:260px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:var(--card-shadow);
+  transition:0.3s;
+}
+
+.card:hover {
+  transform:translateY(-5px);
+  background:var(--surface-hover);
+}
+
+.plan-title {
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  font-size:18px;
+}
+
+.price-amount {
+  font-size:34px;
+  font-weight:800;
+}
+
+.price-period {
+  color:var(--muted);
+}
+
+/* DESCRIPTION */
+.desc {
+  font-size:13px;
+  color:#cbd5e1;
+  margin-top:12px;
+  line-height:1.6;
+}
+
+.desc b {
+  color:white;
+}
+
+/* BUTTON */
+.btn {
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;
+  color:white;
+  padding:12px;
+  width:100%;
+  border-radius:12px;
+  margin-top:15px;
+  cursor:pointer;
+  transition: transform 0.2s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+/* POPULAR */
+.popular {
+  border:1px solid var(--accent);
+  box-shadow:0 0 25px rgba(79,142,255,.25);
+}
+
+.top-nav .back-link,
+.top-nav .pricing-link {
+    font-family: 'Syne', sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em;
+}
+
+/* Hover effects */
+.top-nav .pricing-link:hover {
+    color: #fff;
+    text-shadow: 0 0 12px rgba(167, 139, 250, 0.6);
+}
+
+.top-nav .back-link:hover {
+    color: var(--accent);
+}

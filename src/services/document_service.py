@@ -13,7 +13,6 @@ class DocumentService:
         try:
             text_extractor = TextExtractor()
             raw_text = text_extractor.extract_text(file_path)
-            #jd_text=text_extractor.extract_text(jd_path)
             return raw_text
             
         except Exception as e:

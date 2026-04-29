@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Pricing</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', path='pricing.css') }}">
+</head>
+
+<body>
+
+  <div class="hero">
+    <h1>Choose Your Plan</h1>
+    <p>Smart AI-powered resume analysis platform</p>
+  </div>
+
+  <div class="cards-wrapper">
+
+    <div class="card">
+      <div class="plan-title">Basic</div>
+      <div class="price">
+        <span class="price-amount">$4</span>
+        <span class="price-period">/month</span>
+      </div>
+
+      <p class="desc">
+        🚀 <b>Stop Letting Robots Reject You:</b><br><br>
+        * Precision ATS Score Analysis<br>
+        * Strategic Resume Intelligence Report
+      </p>
+
+      <form action="/simulate-payment" method="POST">
+        <input type="hidden" name="plan" value="Basic">
+        <button type="submit" class="btn">Select Plan</button>
+      </form>
+    </div>
+
+    <div class="card popular">
+      <div class="plan-title">Standard</div>
+      <div class="price">
+        <span class="price-amount">$6</span>
+        <span class="price-period">/month</span>
+      </div>
+
+      <p class="desc">
+        🕵️‍♂️ <b>Identify Your Gaps Before Recruiters Do:</b><br><br>
+        * Precision ATS Score Analysis<br>
+        * Strategic Resume Intelligence Report<br>
+        * Comprehensive Resume Gap Analysis<br>
+        * YouTube resources for resume enhancement
+      </p>
+
+      <form action="/simulate-payment" method="POST">
+        <input type="hidden" name="plan" value="Standard">
+        <button type="submit" class="btn">Select Plan</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="plan-title">Premium</div>
+      <div class="price">
+        <span class="price-amount">$9</span>
+        <span class="price-period">/month</span>
+      </div>
+
+      <p class="desc">
+        👑 <b>The Ultimate "Get Hired" Toolkit:</b><br><br>
+        * Precision ATS Score Analysis<br>
+        * Strategic Resume Intelligence Report<br>
+        * Comprehensive Resume Gap Analysis<br>
+        * YouTube resources for resume enhancement<br>
+        * Real-Time Job Opportunities
+      </p>
+
+      <form action="/simulate-payment" method="POST">
+        <input type="hidden" name="plan" value="Premium">
+        <button type="submit" class="btn">Select Plan</button>
+      </form>
+    </div>
+
+  </div>
+
+</body>
+</html>
