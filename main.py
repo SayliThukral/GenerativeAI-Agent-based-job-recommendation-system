@@ -20,6 +20,64 @@ app.mount("/static", StaticFiles(directory="Frontend/static"), name="static")
 # Templates folder (HTML)
 templates = Jinja2Templates(directory="Frontend/templates")
 
+# -------------------------------------------------------------
+# STEP 1: Helper Function - Plan ke hisaab se result filter karna
+# -------------------------------------------------------------
+def filter_response_by_plan(result: dict, current_plan: str) -> dict:
+    filtered_result = {
+        "message": "Resume uploaded successfully",
+        "ats_score": result.get("ats_score"),
+        "skills_match_percentage": result.get("skills_match_percentage"),
+        "experience_match_percentage": result.get("experience_match_percentage"),
+        "education_match_percentage": result.get("education_match_percentage"),
+        "matched_skills": result.get("matched_skills"),
+        "mismatched_items": result.get("mismatched_items"),
+        "analysis": result.get("analysis")
+    }
+
+    current_plan = current_plan.lower()
+
+    if current_plan in ["standard", "premium"]:
+        filtered_result["gap_analysis"] = result.get("gap_analysis")
+        filtered_result["youtube_recommendations"] = result.get("youtube_recommendations")
+
+    if current_plan == "premium":
+        filtered_result["job_recommendations"] = result.get("job_recommendations")
+
+    return filtered_result
+
+# -------------------------------------------------------------
+# STEP 2: Payment Route with Razorpay Redirect
+# -------------------------------------------------------------
+@app.post("/simulate-payment")
+def simulate_payment(request: Request, plan: str = Form(...)):
+    email = request.session.get("user")
+    if not email:
+        return RedirectResponse("/login", status_code=303)
+        
+    # 1. Plan ke hisaab se amount set karna
+    if plan == "Basic":
+        amount = 399
+    elif plan == "Standard":
+        amount = 599
+    elif plan == "Premium":
+        amount = 899
+    else:
+        amount = 399 # Fallback default
+
+    # 2. Database
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET user_plan = ? WHERE email = ?", (plan, email))
+    conn.commit()
+    conn.close()
+    
+    
+    razorpay_url = f"https://pages.razorpay.com/pl_SipzszlkvxLqTg/view?amount={amount}&email={email}"
+    
+    
+    return RedirectResponse(url=razorpay_url, status_code=303)
+
 @app.get("/")
 def home():
     return RedirectResponse(url="/about", status_code=303)
@@ -53,6 +111,19 @@ def login_page(request: Request):
 def logout(request: Request):
     request.session.clear() # This deletes the cookie!
     return RedirectResponse(url="/login", status_code=303)
+
+@app.get("/pricing")
+def pricing_page(request: Request):
+    # Check karte hain ki user logged in hai ya nahi (optional, baaki pages jaisa)
+    is_logged_in = "user" in request.session
+    
+    
+    return templates.TemplateResponse("pricing.html", {
+        "request": request,
+        "is_logged_in": is_logged_in
+    })
+
+
 
 @app.post("/login")
 def login(
@@ -104,8 +175,8 @@ def signup(
 
     try:
         cursor.execute("""
-        INSERT INTO users (username, name, email, mobile, password)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO users (username, name, email, mobile, password,user_plan)
+        VALUES (?, ?, ?, ?, ?,'None')
         """, (username, name, email, mobile, password))
 
         conn.commit()
@@ -121,28 +192,42 @@ def signup(
             "messages": [("error", "Email already exists")]
         })
     
-@app.get("/pricing")
-def pricing(request: Request):
-    return templates.TemplateResponse("pricing.html", {"request": request})
-
 @app.get("/forgot-password")
 def forgot_password(request: Request):
     messages = []
     return templates.TemplateResponse("forgot_password.html", {"request": request, "messages": messages})
 
+
+
 # Upload API
-# Add 'request: Request' to the parameters so we can check the session
 @app.post("/upload")
 async def upload_files(
     request: Request,
     resume: UploadFile = File(...),
     jd: UploadFile = File(...)
 ):
-    # 1. Check if user is actually logged in before processing!
-    if "user" not in request.session:
-        return {"error": "Unauthorized access. Please login first."}
-
     try:
+        
+        email = request.session.get("user")
+        if not email:
+            return {"error": "Unauthorized. Please login first."}
+
+        conn = get_db()
+        user_record = conn.cursor().execute("SELECT user_plan FROM users WHERE email = ?", (email,)).fetchone()
+        conn.close()
+
+        if not user_record:
+            return {"error": "User not found."}
+
+        current_user_plan = user_record["user_plan"]
+
+        if current_user_plan == "None":
+            return {
+                "error": "Payment Required",
+                "message": "Please subscribe to a plan (Basic, Standard, or Premium) to analyze your resume.",
+                "redirect_url": "/pricing"
+            }
+        
         # Save Resume
         resume_path = f"temp/{resume.filename}"
         with open(resume_path, "wb") as buffer:
@@ -155,22 +240,28 @@ async def upload_files(
 
         # Run Pipeline
         pipeline = Pipeline()
-        result = await pipeline.process_resume(resume_path, jd_path)
-        
-        # Keep the exact return dictionary you had before
-        return {
+        result = await pipeline.process_resume(resume_path, jd_path, email)
+        result["message"] = "Resume uploaded successfully"
+        print(result)
+
+        """return {
             "message": "Resume uploaded successfully",
             "ats_score": result.get("ats_score"),
+
+            # --- ADD THESE MISSING KEYS ---
             "skills_match_percentage": result.get("skills_match_percentage"),
             "experience_match_percentage": result.get("experience_match_percentage"),
             "education_match_percentage": result.get("education_match_percentage"),
             "matched_skills": result.get("matched_skills"),
             "analysis": result.get("analysis"),
             "gap_analysis": result.get("gap_analysis"),
+            
             "mismatched_items": result.get("mismatched_items"),
             "youtube_recommendations": result.get("youtube_recommendations"),
             "job_recommendations": result.get("job_recommendations")
-        }
-
+        }"""
+        
+        final_filtered_response = filter_response_by_plan(result, current_user_plan)
+        return final_filtered_response
     except Exception as e:
         return {"error": str(e)}

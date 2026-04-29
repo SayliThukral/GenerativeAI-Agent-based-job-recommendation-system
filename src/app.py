@@ -1,7 +1,7 @@
 import asyncio
 import sys
 import json
-
+from database import get_db
 from test_serper_api import get_youtube_tutorials_for_gaps
 from src.services.prompts.summarise_missing_items_prompts import SUMMARY_SYSTEM_PROMPT, SUMMARY_USER_PROMPT
 
@@ -58,8 +58,20 @@ class Pipeline:
         self.document_service = DocumentService()
         self.ats_service = ATSservice()
 
-    async def process_resume(self, cv_path: str, jd_path: str) -> dict:
+    
+    async def process_resume(self, cv_path: str, jd_path: str, email: str) -> dict:
         try:
+            # ── 0. Fetch User Plan from Database ──────────────────────────────
+            conn = get_db()
+            cursor = conn.cursor()
+            user_record = cursor.execute("SELECT user_plan FROM users WHERE email = ?", (email,)).fetchone()
+            conn.close()
+
+            # Agar record milta hai toh plan lo, nahi toh default 'basic' rakh lo
+            user_plan = user_record["user_plan"].lower() if user_record else "basic"
+            print(f"Plan fetched directly from DB in app.py: {user_plan}")
+
+
             # ── 1. Extract raw text ───────────────────────────────────────────
             cv_text = self.document_service.extract_text(cv_path)
             if not cv_text:
@@ -71,22 +83,19 @@ class Pipeline:
 
             # ── 2. Parse CV + JD into structured data ─────────────────────────
             cv_items = await self.ats_service.extract_cv_items(cv_text)
-            print("CV ITEMS:", cv_items)
             jd_items = await self.ats_service.extract_jd_items(jd_text)
 
-            # ── 3. Extract domain (used in stages 4 + 5) ──────────────────────
+            # ── 3. Extract domain ──────────────────────
             domain = "Professional"
             if isinstance(cv_items, dict):
                 domain = cv_items.get("Domain") or "Professional"
-            print("DOMAIN:", domain)
 
             # ── 4. Generate ATS score + mismatched_items ──────────────────────
             ats_score = await self.ats_service.generate_ats_score(cv_items, jd_items)
-
+            
             if not isinstance(ats_score, dict):
                 return {"error": "ATS scoring failed. Please try again."}
 
-            # Guarantee every required field exists and is the right type
             ats_score.setdefault("ats_score",                  0)
             ats_score.setdefault("skills_match_percentage",    0)
             ats_score.setdefault("experience_match_percentage", 0)
@@ -95,40 +104,28 @@ class Pipeline:
             ats_score.setdefault("mismatched_items",           [])
             ats_score.setdefault("analysis", "Analysis unavailable for this submission.")
 
-            # Coerce any accidental nulls on array fields
             ats_score["matched_skills"]   = safe_list(ats_score["matched_skills"])
             ats_score["mismatched_items"] = safe_list(ats_score["mismatched_items"])
 
-            # Ensure analysis is never an empty string
             if not ats_score["analysis"] or not str(ats_score["analysis"]).strip():
                 ats_score["analysis"] = "Analysis unavailable for this submission."
 
-
             # ── 5. Gap analysis ───────────────────────────────────────────────
-            # Strip category prefixes in Python — saves LLM tokens + more reliable
             raw_missing   = ats_score["mismatched_items"]
             clean_missing = strip_category_prefixes(raw_missing)
 
             gap_response = await self.ats_service.summarise_missing_items(
                 SUMMARY_SYSTEM_PROMPT,
-                SUMMARY_USER_PROMPT.format(
-                    domain=domain,
-                    missing_keywords=clean_missing
-                )
+                SUMMARY_USER_PROMPT.format(domain=domain, missing_keywords=clean_missing)
             )
 
-            print("RAW GAP RESPONSE:", gap_response)
-
-            # Parse gap response safely
             if isinstance(gap_response, dict):
                 gap_data = gap_response
             elif isinstance(gap_response, str):
                 try:
-                    # Strip accidental markdown fences if present
                     clean = gap_response.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
                     gap_data = json.loads(clean)
                 except json.JSONDecodeError as e:
-                    print(f"Gap analysis JSON parse error: {e}\nRaw: {gap_response}")
                     gap_data = {}
             else:
                 gap_data = {}
@@ -139,25 +136,29 @@ class Pipeline:
                 "education":  safe_list(gap_data.get("education")),
             }
 
-            # ── 6. YouTube recommendations ────────────────────────────────────
-            raw_youtube = get_youtube_tutorials_for_gaps(domain)
-            ats_score["youtube_recommendations"] = clean_youtube_titles(
-                raw_youtube if isinstance(raw_youtube, dict) else {}
-            )
-
-            skills = ats_score.get("matched_skills", [])
-            #experience = ats_score.get("gap_analysis", {}).get("experience", [])
-            experience = ats_score.get("Experience", [])
+            # ── 6. YouTube recommendations (Fixed Indentation) ────────────────
+            if user_plan in ["standard", "premium"]:
+                raw_youtube = get_youtube_tutorials_for_gaps(domain)
+                ats_score["youtube_recommendations"] = clean_youtube_titles(
+                    raw_youtube if isinstance(raw_youtube, dict) else {}
+                )
+            else:
+                ats_score["youtube_recommendations"] = {}
             
-            job_recommendations = get_job_recommendations(domain, skills, experience)
+            # ── 7. Job recommendations ────────────────────────────────────────
+            if user_plan == "premium":
+                skills = ats_score.get("matched_skills", [])
+                experience = ats_score.get("Experience", [])
+                job_recommendations = get_job_recommendations(domain, skills, experience)
+                ats_score["job_recommendations"] = job_recommendations
+            else:
+                ats_score["job_recommendations"] = []
 
-            ats_score["job_recommendations"] = job_recommendations
             return ats_score
 
         except Exception as e:
             print(f"Pipeline error: {e}")
             return {"error": f"An unexpected error occurred: {str(e)}"}
-
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 

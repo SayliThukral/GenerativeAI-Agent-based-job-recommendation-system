@@ -5,7 +5,6 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def create_table():
     conn = get_db()
     cursor = conn.cursor()
@@ -17,7 +16,8 @@ def create_table():
         name TEXT,
         email TEXT UNIQUE,
         mobile TEXT,
-        password TEXT
+        password TEXT,
+        user_plan TEXT DEFAULT 'None'  
     )
     """)
 
